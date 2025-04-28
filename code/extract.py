@@ -4,17 +4,19 @@ import os
 
 NEWSAPI_KEY = '6df10063ea604da59cd57ffeeda7c4d1'
 
-def fetch_top_headlines(country_code, page_size = 100):
+def fetch_top_headlines(country_code, page_size = 100, language = 'en'):
     '''
     Retrieves the top headline articles for inputed country. 
     Enter the country code for desired country. EX: us
-    page_size restricted to 100 because the free API access only allows pulling 100 articles at a time.
+    Page_size restricted to 100 because the free API access only allows pulling 100 articles at a time.
+    Specifies to pull english articles
     '''
     url = "https://newsapi.org/v2/top-headlines"
     headers = {'X-API-Key': NEWSAPI_KEY}
     params = {
         'country': country_code.lower(), #Converts country code to lower for API requirement
-        'pageSize': page_size #Restrictred to 100 due to API limits
+        'pageSize': page_size, #Restrictred to 100 due to API limits
+        'language': language #Specifies english articles
     }
 
     #Makes request to API based on parameters
