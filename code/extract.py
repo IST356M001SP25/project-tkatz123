@@ -9,14 +9,14 @@ def fetch_top_headlines(country_code, page_size = 100, language = 'en'):
     Retrieves the top headline articles for inputed country. 
     Enter the country code for desired country. EX: us
     Page_size restricted to 100 because the free API access only allows pulling 100 articles at a time.
-    Specifies to pull english articles
+    Specifies to pull articles only in eEglish
     '''
     url = "https://newsapi.org/v2/top-headlines"
     headers = {'X-API-Key': NEWSAPI_KEY}
     params = {
         'country': country_code.lower(), #Converts country code to lower for API requirement
         'pageSize': page_size, #Restrictred to 100 due to API limits
-        'language': language #Specifies english articles
+        'language': language #Specifies to pull files only in English
     }
 
     #Makes request to API based on parameters
@@ -65,6 +65,7 @@ def save_articles_to_csv(articles, country_code):
 
 
 if __name__ == "__main__":
+    
     country_code = 'us'
     articles = fetch_top_headlines(country_code)
     save_articles_to_csv(articles, country_code)

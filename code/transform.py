@@ -29,7 +29,7 @@ def clean_text(text):
     #Strips and returns text
     return text.strip()
 
-def create_short_title(title, num_words = 8):
+def create_short_title(title, num_words = 10):
     '''
     Returns the first 'num_words' from a title string
     '''

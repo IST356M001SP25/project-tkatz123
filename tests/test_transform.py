@@ -21,7 +21,7 @@ def test_clean_text():
 
 #This function shortens a title to the first 8 words
 def test_create_short_title():
-    assert create_short_title("This is a very long title that should be shortened") == "This is a very long title that should"
+    assert create_short_title("This is a very long title that should be shortened down to less words") == "This is a very long title that should be shortened"
     assert create_short_title("") == ""
     assert create_short_title(None) == ""
 
