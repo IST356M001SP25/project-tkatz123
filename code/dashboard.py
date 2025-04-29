@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd 
 import os
+import shutil
 import plotly.express as px
 import random
 from wordcloud import WordCloud
@@ -12,6 +13,8 @@ from transform import transform_articles
 #Defines the webpage title
 st.set_page_config(page_title="News Headlines Dashboard", layout="wide")
 
+if 'api_limit_exceeded' not in st.session_state:
+    st.session_state.api_limit_exceeded = False
 
 #Specifies the background color and centers the title
 st.markdown(
@@ -55,16 +58,36 @@ else:
 
 #Creates a sidebar dropdown menu to select country
 dropdown_options = ['Select a Country...'] + sorted(dropdown_options)
-st.sidebar.header("Filter Options")
+st.sidebar.header("🔎 Filter Options")
 country_code = st.sidebar.selectbox(
     "Select a Country",
     options=sorted(dropdown_options), 
     index=0
 )
 
+st.sidebar.markdown("### Admin Controls ⚙️")
+
+# Add a clear cache button
+if st.sidebar.button("Clear Cache 🗑️"):
+    cache_dir = 'cache'
+    if os.path.exists(cache_dir):
+        for filename in os.listdir(cache_dir):
+            file_path = os.path.join(cache_dir, filename)
+            try:
+                os.remove(file_path)
+            except Exception as e:
+                st.error(f"Failed to delete {filename}: {e}")
+        st.success("✅ Cache cleared successfully!")
+    else:
+        st.info("📂 Cache folder does not exist.")
+
 #When a country is selected run the following
 if country_code != 'Select a Country...':
     
+    if st.session_state.get('api_limit_exceeded', False):
+        st.error("❌ API limit was already exceeded. Please use cached data.")
+        st.stop()
+
     #Gets the filepath name for the clean data (end result of pipeline)
     cleaned_file_path = f'cache/cleaned_headlines_{country_code.lower()}.csv'
 
@@ -101,11 +124,9 @@ if country_code != 'Select a Country...':
         except Exception as e:
             #If API error because of daily usage limit, switch to cached-only mode
             if "Daily API usage" in str(e):
-                api_limit_exceeded = True
-                st.warning("⚠️ API daily limit exceeded. Only cached countries are available now.")
-
-                #Forces the sidebar dropdown to re run with only cached values
-                st.rerun()
+                st.session_state.api_limit_exceeded = True
+                st.error("❌ API daily usage limit exceeded. Please use a cached country or try again later.")
+                st.stop()
             else:
                 st.error(f"❌ Error loading data: {e}")
                 st.stop()

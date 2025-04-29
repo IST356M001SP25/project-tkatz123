@@ -4,7 +4,7 @@ import os
 import re
 from datetime import datetime
 
-APIKEY = 'bf2ca1697b4e58f4c46ce1cc'
+APIKEY = 'ADD YOUR API KEY'
 
 ##HELPER FUNCTIONS
 

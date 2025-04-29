@@ -2,7 +2,7 @@ import requests
 import pandas as pd
 import os
 
-NEWSAPI_KEY = '6df10063ea604da59cd57ffeeda7c4d1'
+NEWSAPI_KEY = 'ADD YOUR API KEY'
 
 def fetch_top_headlines(country_code, page_size = 100, language = 'en'):
     '''
@@ -33,14 +33,16 @@ def fetch_top_headlines(country_code, page_size = 100, language = 'en'):
     
 def save_articles_to_csv(articles, country_code):
     '''
-    Saves articles from API request to cache, avoiding unnecesary API requests
+    Saves 10 articles from API request to cache, avoiding unnecesary API requests
     '''
     #Runs code if articles exist
     if articles:
 
+        limited_articles = articles[:10]
+
         #Converts articles to DF
         df = pd.json_normalize(
-            articles,
+            limited_articles,
             record_path= None,
             meta = ['source.id', 'source.name', 'author', 'title', 'description', 'url', 'urlToImage',
                     'publishedAt', 'content'],
