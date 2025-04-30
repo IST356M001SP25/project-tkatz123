@@ -4,7 +4,7 @@ import os
 import re
 from datetime import datetime
 
-APIKEY = 'ADD YOUR API KEY'
+APIKEY = 'ENTER YOUR API KEY'
 
 ##HELPER FUNCTIONS
 
@@ -61,7 +61,7 @@ def get_sentiment(text):
 
     #Wraps API call in try accept statement to avoid crashes
     try:
-        response = requests.post(url, headers= headers, data = data, timeout= 60) #Makes call to the API
+        response = requests.post(url, headers= headers, data = data, timeout= 120) #Makes call to the API
         if response.status_code == 200: #Only returns result if success code is returned
             result = response.json()
             return result['results']['documents'][0]['sentiment']
@@ -88,7 +88,7 @@ def get_entities(text):
     #Wraps API call in try statement to avoid crashing
     try:
         #Calls to API
-        response = requests.post(url, headers = headers, data = data, timeout= 60)
+        response = requests.post(url, headers = headers, data = data, timeout= 120)
         if response.status_code == 200: #Only runs if success code is returned
             result = response.json()
             documents = result['results']['documents'] #Stores a list of documents
@@ -138,7 +138,7 @@ def get_topic_from_entities(entities):
     #Wraps API call in try except statement to avoid crashes
     try:
         #Calls to API
-        response = requests.post(url, headers = headers, data = data, timeout= 60)
+        response = requests.post(url, headers = headers, data = data, timeout= 120)
         if response.status_code == 200: #Only runs of API status code is succesfukl
             topic = response.json().strip() #Strips response
             return topic if topic else "Unknown" #Return topci if it exists otherwise returns unknown
@@ -225,6 +225,13 @@ def transform_articles(country_code):
 
     #Categorizes time of publish into group of 3 hour block
     df['time_of_day_published'] = df['publishedAt'].dt.hour.apply(categorize_time_of_day)
+
+    # Drop rows with missing or uninformative data
+    df = df[
+    df['entities'].apply(lambda x: isinstance(x, list) and len(x) > 0) &
+    df['sentiment'].notna() & (df['sentiment'] != "Unknown") &
+    df['topic'].notna() & (df['topic'] != "Unknown")
+]
 
     #Writes cleaned data to cache
     savepath = os.path.join('cache', f'cleaned_headlines_{country_code.lower()}.csv')

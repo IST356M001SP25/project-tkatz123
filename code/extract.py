@@ -2,7 +2,7 @@ import requests
 import pandas as pd
 import os
 
-NEWSAPI_KEY = 'ADD YOUR API KEY'
+NEWSAPI_KEY = 'ENTER YOUR API KEY'
 
 def fetch_top_headlines(country_code, page_size = 100, language = 'en'):
     '''
@@ -38,7 +38,7 @@ def save_articles_to_csv(articles, country_code):
     #Runs code if articles exist
     if articles:
 
-        limited_articles = articles[:10]
+        limited_articles = articles[:15]
 
         #Converts articles to DF
         df = pd.json_normalize(

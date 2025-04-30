@@ -44,6 +44,20 @@ def get_cached_countries():
 
     return cached_countries
 
+def safe_parse_entities(x):
+    if isinstance(x, str) and x.strip() not in ["", "[]"]:
+        try:
+            return ast.literal_eval(x)
+        except (ValueError, SyntaxError):
+            return []
+    elif isinstance(x, list):
+        return x
+    else:
+        return []
+
+if 'country_code' not in st.session_state:
+    st.session_state.country_code = 'Select a Country...'
+
 #All the countries the news API supports
 all_country_codes = ['us', 'gb', 'ca', 'au']
 
@@ -61,8 +75,9 @@ dropdown_options = ['Select a Country...'] + sorted(dropdown_options)
 st.sidebar.header("🔎 Filter Options")
 country_code = st.sidebar.selectbox(
     "Select a Country",
-    options=sorted(dropdown_options), 
-    index=0
+    options=dropdown_options,
+    index=dropdown_options.index(st.session_state.country_code),
+    key='country_code'
 )
 
 st.sidebar.markdown("### Admin Controls ⚙️")
@@ -77,6 +92,7 @@ if st.sidebar.button("Clear Cache 🗑️"):
                 os.remove(file_path)
             except Exception as e:
                 st.error(f"Failed to delete {filename}: {e}")
+        st.session_state.country_code = 'Select a Country...'
         st.success("✅ Cache cleared successfully!")
     else:
         st.info("📂 Cache folder does not exist.")
@@ -95,12 +111,15 @@ if country_code != 'Select a Country...':
     if os.path.exists(cleaned_file_path):
         st.success(f"✅ Loaded cached cleaned headlines for '{country_code.upper()}'") #Display loaded cache data
         df = pd.read_csv(cleaned_file_path) #Sets the cleaned data to DF
-        df['entities'] = df['entities'].apply(lambda x: ast.literal_eval(x) if isinstance(x, str) else x)
+        if 'entities' in df.columns:
+            df['entities'] = df['entities'].apply(safe_parse_entities)
+        else:
+            df['entities'] = [[] for _ in range(len(df))]
     else: #If the selected countries clean data doesn't exist in cache
 
         try:
             st.info(f"🔄 Fetching fresh top headlines for '{country_code.upper()}'...")
-            
+
             #Extract raw headlines
             articles = fetch_top_headlines(country_code.lower())
             st.write(f"🔎 Articles fetched: {len(articles)}")
@@ -113,10 +132,15 @@ if country_code != 'Select a Country...':
             save_articles_to_csv(articles, country_code.lower())
             st.write(f"✅ Saved raw articles to cache/top_headlines_{country_code.lower()}.csv")
 
-            #Transform raw headlines into cleaned DF
-            df = transform_articles(country_code.lower())
-            df['entities'] = df['entities'].apply(lambda x: ast.literal_eval(x) if isinstance(x, str) else x)
+            st.info(f"⏰This step may take a minute. Please be patient")
 
+            #Transform raw headlines into cleaned DF
+            transform_articles(country_code.lower())
+            df = pd.read_csv(cleaned_file_path)
+            if 'entities' in df.columns:
+                df['entities'] = df['entities'].apply(safe_parse_entities)
+            else:
+                df['entities'] = [[] for _ in range(len(df))]
 
             #Displays success message when loaded
             st.success(f"✅ Successfully cleaned and cached headlines for '{country_code.upper()}'")
