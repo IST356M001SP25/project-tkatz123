@@ -44,6 +44,7 @@ def get_cached_countries():
 
     return cached_countries
 
+#Function to check for missing values in entities
 def safe_parse_entities(x):
     if isinstance(x, str) and x.strip() not in ["", "[]"]:
         try:
