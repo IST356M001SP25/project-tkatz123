@@ -2,7 +2,7 @@ import requests
 import pandas as pd
 import os
 
-NEWSAPI_KEY = 'ENTER YOUR API KEY'
+NEWSAPI_KEY = 'SEE EMAIL FOR API KEY'
 
 def fetch_top_headlines(country_code, page_size = 100, language = 'en'):
     '''

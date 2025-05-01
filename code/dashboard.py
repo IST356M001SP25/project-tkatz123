@@ -92,10 +92,16 @@ if st.sidebar.button("Clear Cache 🗑️"):
                 os.remove(file_path)
             except Exception as e:
                 st.error(f"Failed to delete {filename}: {e}")
-        st.session_state.country_code = 'Select a Country...'
-        st.success("✅ Cache cleared successfully!")
+        if 'country_code' in st.session_state:
+            del st.session_state['country_code']
+        st.session_state.cache_cleared = True
+        st.rerun()
     else:
         st.info("📂 Cache folder does not exist.")
+
+if st.session_state.get("cache_cleared", False):
+    st.success("✅ Cache cleared successfully!")
+    del st.session_state["cache_cleared"]
 
 #When a country is selected run the following
 if country_code != 'Select a Country...':
